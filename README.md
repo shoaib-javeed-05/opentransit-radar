@@ -80,7 +80,7 @@ docs/screenshots/
 
 Supervisor: Mian Muhammad Abubakr, Department of Computer Science, Government Islamia Graduate College.
 
-**On AI tools:** I delegated the November 2026 security review described above to an AI coding agent (Claude Code), and I assembled this showcase repository, including its diagrams, with the same agent working from the private code. In both cases I treated the tests and CI, not the agent's own report, as the evidence that the work was correct.
+**On AI tools:** I used AI coding assistants throughout the prototype. I designed the architecture, the data model and the tenant-isolation approach, and I treat tests and CI, not an assistant's own report, as the evidence that generated code is correct; the security review above is one example.
 
 ## Contact
 
