@@ -6,9 +6,9 @@ Final-year design project, B.S. Computer Science, University of the Punjab (Gove
 > This is a public showcase. The full source code lives in a private repository because it is an assessed team project. This repository contains the architecture, the evaluation plan, screenshots, and one self-contained module with its tests. I am happy to walk through the private code on request.
 
 **Live service:** https://opentransit-randar1.onrender.com. This is the real deployment, not a demo: buses appear only when a registered vehicle is on duty, so the map is often empty during development. The first load can take about a minute on free hosting.
-**Video walkthrough:** [link — 60–90 seconds, unlisted YouTube, recorded on a local copy with test data]
 
 ![Passenger Radar](docs/screenshots/passenger-radar.png)
+*Passenger Radar on the live service, 20 November 2026, with no vehicle on duty. Map data © OpenStreetMap contributors.*
 
 ---
 
@@ -35,8 +35,10 @@ No pilot has run yet. Every number in the evaluation plan below is a **target**,
 
 ![Architecture](docs/diagrams/architecture.png)
 ![Data flow](docs/diagrams/dataflow.png)
+![Database](docs/diagrams/erd.png)
 
-GPS fix → upload (HTTP, WebSocket, or a pull adapter) → gateway (JWT, rate limit, tenant context) → duplicate filter → PostGIS route snapping → trip state and speed audit → arrival-time estimate → store under row-level security → WebSocket fan-out to the passenger map.
+Every GPS fix: upload (WebSocket from the driver app with a driver JWT, or HTTP POST) → find the bus and resolve its tracking mode → 3-second duplicate filter → speed check against the route limit → store the point in PostGIS → WebSocket fan-out to the passenger map.
+Arrival times are computed when a passenger asks: latest stored fix → PostGIS route snapping → distance remaining along the route → blended-speed estimate (`geo/geo_math.py`). Tenant tables use forced row-level security, with tenant context set per transaction.
 
 **Stack used in this project:** Python, FastAPI, async SQLAlchemy, PostgreSQL 16 + PostGIS, GeoAlchemy2, JWT, WebSockets, Flutter/Dart, Docker Compose, pytest, GitHub Actions; ESP32 firmware in C++ (planned hardware).
 
@@ -63,7 +65,7 @@ The agent did the review and wrote the changes; my part was asking for it, revie
 ```
 geo/            geo_math.py — dependency-free route-distance and arrival-time arithmetic
 tests/          unit tests for geo_math.py
-docs/diagrams/  architecture, data flow, database, state machine
+docs/diagrams/  architecture, data flow, database (PNG + Graphviz sources in src/)
 docs/screenshots/
 .github/workflows/tests.yml — runs the unit tests on every push
 ```
@@ -78,8 +80,8 @@ docs/screenshots/
 
 Supervisor: Mian Muhammad Abubakr, Department of Computer Science, Government Islamia Graduate College.
 
-**On AI tools:** [STATE TRUTHFULLY which parts of the prototype were written with AI coding assistants, e.g. "I used AI coding assistants throughout the prototype; I designed the architecture and data model and reviewed all generated code."]
+**On AI tools:** I delegated the November 2026 security review described above to an AI coding agent (Claude Code), and I assembled this showcase repository, including its diagrams, with the same agent working from the private code. In both cases I treated the tests and CI, not the agent's own report, as the evidence that the work was correct.
 
 ## Contact
 
-Shoaib Javeed · shoaibjaveed450@gmail.com · [GitHub](https://github.com/shoaib-javeed-05) · [LinkedIn](https://www.linkedin.com/in/shoaib-javeed05)
+Shoaib Javeed · dev@shoaibjaveed.me · [GitHub](https://github.com/shoaib-javeed-05) · [LinkedIn](https://www.linkedin.com/in/shoaib-javeed05)

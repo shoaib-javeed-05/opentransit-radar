@@ -1,0 +1,26 @@
+// OpenTransit Radar: one GPS fix, as the current prototype handles it (Nov 2026).
+digraph dataflow {
+  graph [rankdir=LR, fontname="Helvetica", fontsize=12, nodesep=0.3, ranksep=0.35, pad=0.3, bgcolor="white"];
+  node  [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#888888", fontname="Helvetica", fontsize=11, margin="0.15,0.07"];
+  edge  [color="#666666", arrowsize=0.7, fontname="Helvetica", fontsize=10];
+
+  subgraph cluster_pull { label="ETA path (when a passenger asks)"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    b1 [label="GET /buses/{id}/eta"];
+    b2 [label="Latest stored fix"];
+    b3 [label="Snap to route\nST_LineLocatePoint"];
+    b4 [label="Distance remaining\nalong route"];
+    b5 [label="Blended-speed ETA\ngeo_math.estimate_eta_minutes", fillcolor="#e4eefb", color="#2a6fd6"];
+    b1 -> b2 -> b3 -> b4 -> b5;
+  }
+  subgraph cluster_push { label="Push path (every fix)"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    a1 [label="1  GPS fix"];
+    a2 [label="2  Upload\nWebSocket or HTTP"];
+    a3 [label="3  Find bus\nresolve tracking mode"];
+    a4 [label="4  3-second\nduplicate filter", fillcolor="#e4eefb", color="#2a6fd6"];
+    a5 [label="5  Speed check\nlog violation"];
+    a6 [label="6  Store point\ntelemetry_history"];
+    a7 [label="7  WebSocket\nfan-out"];
+    a8 [label="Passenger map"];
+    a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8;
+  }
+}

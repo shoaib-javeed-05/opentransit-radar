@@ -1,0 +1,51 @@
+// OpenTransit Radar: architecture of the current prototype (Nov 2026).
+// Dashed = planned, not built yet.
+digraph architecture {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=13, nodesep=0.35, ranksep=0.55, pad=0.3, bgcolor="white", newrank=true];
+  node  [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#888888", fontname="Helvetica", fontsize=11, margin="0.18,0.08"];
+  edge  [color="#666666", fontname="Helvetica", fontsize=10, arrowsize=0.7];
+
+  subgraph cluster_edge {
+    label="GPS sources"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    drv  [label=<<b>Driver app</b> (Flutter)<br/>phone GPS, WebSocket stream>];
+    esp  [label=<<b>GPS tracker</b> (ESP32 + NEO-6M + SIM800L)<br/>HTTP POST &#8212; planned>, style="rounded,filled,dashed"];
+  }
+
+  subgraph cluster_api {
+    label="FastAPI backend (Python 3.12)"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    ws_in   [label=<<b>WS /ws/telemetry/{bus_id}</b><br/>driver JWT>];
+    http_in [label=<<b>POST /api/v1/telemetry</b>>];
+    trk     [label=<<b>Tracking engine</b><br/>mode resolver: DRIVER_APP | HARDWARE_GPS | HYBRID<br/>3-second duplicate filter (HYBRID)>, fillcolor="#e4eefb", color="#2a6fd6"];
+    spd     [label=<<b>Speed compliance</b><br/>logs fixes over the route limit>];
+    wsm     [label=<<b>WebSocket manager</b><br/>channels: {bus_id} and "all">];
+    eta     [label=<<b>ETA endpoint</b> (on request)<br/>route snap &#8594; distance remaining &#8594;<br/>blended-speed estimate (geo_math)>, fillcolor="#e4eefb", color="#2a6fd6"];
+    rb      [label=<<b>Route builder</b><br/>stop pins &#8594; polyline (optional OSRM)>];
+    term    [label=<<b>Terminal services</b><br/>dispatch queue, adda fee logs>];
+  }
+
+  subgraph cluster_db {
+    label="PostgreSQL 16 + PostGIS 3.4"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    db  [label=<<b>Tenant data</b><br/>FORCE ROW LEVEL SECURITY on companies, users,<br/>buses, routes, terminals, adda_tax_logs<br/>tenant context set per transaction>];
+    gis [label=<<b>Spatial</b><br/>telemetry_history (Point, 4326)<br/>routes.path_geometry (LineString, 4326)<br/>ST_LineLocatePoint, ST_ClosestPoint>];
+  }
+
+  subgraph cluster_apps {
+    label="Client apps (Flutter / web)"; labeljust=l; style="rounded,filled"; fillcolor="#f6f6f2"; color="#cccccc";
+    pax [label=<<b>Passenger map</b><br/>no login; subscribes to "all">];
+    drv2 [label=<<b>Driver</b>>];
+    mgr [label=<<b>Manager</b><br/>fleet, routes, dispatch>];
+    adm [label=<<b>Super admin</b>>];
+  }
+
+  drv -> ws_in; esp -> http_in [style=dashed];
+  ws_in -> trk; http_in -> trk;
+  trk -> spd [label=" every fix"];
+  spd -> gis [label=" store fix"];
+  trk -> wsm [label=" accepted fix"];
+  wsm -> pax [label=" WSS push"];
+  pax -> eta [label=" GET /buses/{id}/eta", style=dashed, dir=back, arrowtail=normal, arrowhead=none];
+  eta -> gis;
+  rb -> db; term -> db; spd -> db [style=invis];
+  mgr -> rb [style=invis]; adm -> term [style=invis];
+  {rank=same; pax; drv2; mgr; adm}
+}

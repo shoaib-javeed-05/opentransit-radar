@@ -1,0 +1,28 @@
+// OpenTransit Radar: core tables of the current prototype (Nov 2026).
+// Shaded = FORCE ROW LEVEL SECURITY on tenant (company) context.
+// Not shown: seat_reservations, user_favorites, support_messages, company_feature_flags, company_activation_tokens.
+digraph erd {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=12, nodesep=0.45, ranksep=0.6, pad=0.3, bgcolor="white"];
+  node  [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#888888", fontname="Helvetica", fontsize=11, margin="0.15,0.07"];
+  edge  [color="#666666", arrowsize=0.7, fontname="Helvetica", fontsize=9];
+
+  companies [label=<<b>companies</b><br/>tenant; default_tracking_mode>, fillcolor="#e4eefb", color="#2a6fd6"];
+  users     [label=<<b>users</b><br/>company_id &#8594; companies>, fillcolor="#e4eefb", color="#2a6fd6"];
+  routes    [label=<<b>routes</b><br/>company_id; path_geometry LineString 4326>, fillcolor="#e4eefb", color="#2a6fd6"];
+  buses     [label=<<b>buses</b><br/>company_id, route_id, driver &#8594; users<br/>tracking_mode_override, current_status>, fillcolor="#e4eefb", color="#2a6fd6"];
+  terminals [label=<<b>terminals</b><br/>company_id, route_id; location Point 4326>, fillcolor="#e4eefb", color="#2a6fd6"];
+  adda      [label=<<b>adda_tax_logs</b><br/>terminal, bus, schedule, user>, fillcolor="#e4eefb", color="#2a6fd6"];
+  stations  [label=<<b>stations</b><br/>route_id>];
+  telem     [label=<<b>telemetry_history</b><br/>bus_id; position Point 4326<br/>speed_kmh, source, speed_violation>];
+  trips     [label=<<b>trip_history</b><br/>bus, route, driver>];
+  sched     [label=<<b>schedules</b><br/>bus, route, terminal>];
+  viol      [label=<<b>speed_violation_logs</b><br/>bus, route, driver>];
+
+  companies -> users; companies -> routes; companies -> buses; companies -> terminals;
+  routes -> buses; routes -> stations; routes -> terminals;
+  users -> buses [label=" driver"];
+  buses -> telem; buses -> trips; buses -> sched; buses -> viol;
+  routes -> trips; routes -> sched; routes -> viol; terminals -> sched;
+  terminals -> adda; buses -> adda; sched -> adda;
+  key [shape=plaintext, style="", label=<<font point-size="10"><i>Arrows run from the referenced table to the referencing one. Shaded tables have forced row-level security.<br/>Five smaller tables are not shown.</i></font>>];
+}
