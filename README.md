@@ -10,6 +10,12 @@ Final-year design project, B.S. Computer Science, University of the Punjab (Gove
 ![Passenger Radar](docs/screenshots/passenger-radar.png)
 *Passenger Radar on the live service, 20 November 2026, with no vehicle on duty. Map data © OpenStreetMap contributors.*
 
+## Demo video (87 seconds)
+
+[![Watch the 87-second demo](docs/screenshots/demo-poster.png)](https://youtu.be/f8fbaKTtuMM)
+
+Seven simulated buses on the Passenger Radar; tapping a bus opens its trip card with live speed, progress along the route, distance left, and the ETA to the next stop. **Recorded on a local copy with simulated test data, not the live service;** bus movement is sped up 6× and every name, plate and company in it is test data.
+
 ---
 
 ## The problem
@@ -59,6 +65,8 @@ All results will be reported here, including targets the system misses.
 In November 2026 I delegated a security review of the backend to an AI coding agent (Claude Code). It found row-level-security policies that granted access whenever tenant context was missing, and it reported that it could not run the integration tests in its own environment. Its changes then failed continuous integration twice: first on a test set-up error, then on a real fault that reading the code had not revealed, where a pooled database connection could carry one tenant's context into another tenant's request. The fix applies tenant context per transaction with fail-closed policies. I merged the change only after cross-tenant tests passed against PostGIS in CI.
 
 The agent did the review and wrote the changes; my part was asking for it, reviewing the changes, and deciding to trust CI rather than the agent's report. This episode is the reason I am interested in how developers judge what coding agents claim about their own work.
+
+Recording the demo video surfaced a second bug the existing tests had missed: the bus card's next-stop ETA silently fell back to a fixed distance, because a stored GPS position was passed to PostGIS in a format it rejected and the error was swallowed. The agent traced it, and the fix measures the distance left along the route to the next stop and uses the same estimator as `geo/geo_math.py`. It added regression tests that fail on the old code, and I merged it in the private repository.
 
 ## What is in this repository
 
