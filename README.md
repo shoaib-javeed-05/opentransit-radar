@@ -1,7 +1,7 @@
 # OpenTransit Radar
 
 **Live tracking and arrival-time estimates for privately operated buses in Lahore.**
-Final-year design project, B.S. Computer Science, University of the Punjab (Government Islamia Graduate College). Team of three. **In progress (November 2026 – June 2027).**
+Final-year design project, B.S. Computer Science, University of the Punjab (Government Islamia Graduate College). Team of three. **In progress (October 2026 – March 2027).**
 
 > This is a public showcase. The full source code lives in a private repository because it is an assessed team project. This repository contains the architecture, the evaluation plan, screenshots, and one self-contained module with its tests. I am happy to walk through the private code on request.
 
