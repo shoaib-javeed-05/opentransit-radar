@@ -7,6 +7,8 @@ Final-year design project, B.S. Computer Science, University of the Punjab (Gove
 
 **Live service:** https://opentransit-randar1.onrender.com. This is the real deployment, not a demo: buses appear only when a registered vehicle is on duty, so the map is often empty during development. The first load can take about a minute on free hosting.
 
+Note on names: the address is spelled "randar" because of a typo made when the hosting service was created; it is the correct live service. "Passenger Radar" is the passenger app of OpenTransit Radar. [Taxi sentence, only if true, e.g.: The "Ride-Hail Taxis" tab is an early experiment outside the scope of the final-year project.]
+
 ![Passenger Radar](docs/screenshots/passenger-radar.png)
 *Passenger Radar on the live service, 20 November 2026, with no vehicle on duty. Map data © OpenStreetMap contributors.*
 
